@@ -37,12 +37,13 @@ test('正常なら応答時間を出す', () => {
   assert.match(watchImage({ ...base, lastMs: 2400 }), />2\.4s</, '1秒以上は秒で出す');
 });
 
-test('疑いのときは赤まであと何回かを出す', () => {
+test('疑いのときは数字を出さない', () => {
   const svg = watchImage({
     ...base, status: STATUS.suspect, lastMs: null,
     consecutiveFailures: 1, failuresToDown: 3,
   });
-  assert.match(svg, />1\/3</);
+  assert.match(svg, />CHECKING</);
+  assert.ok(!svg.includes('1/3'), '日付に読める書き方をしない');
 });
 
 test('長い表示名は詰める', () => {

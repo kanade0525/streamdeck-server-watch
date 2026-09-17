@@ -76,9 +76,10 @@ export const downDuration = (ms) => {
 const centerText = (v) => {
   if (v.status === STATUS.idle) return '—';
   if (v.status === STATUS.down) return `DOWN ${downDuration(v.downFor ?? 0)}`;
-  // 疑いの間は「赤まであと何回か」を出す。失敗の回数だけを出しても、
-  // それがどれだけ深刻なのか見る側に分からない
-  if (v.lastMs === null) return `${v.consecutiveFailures}/${v.failuresToDown ?? '?'}`;
+  // 疑いの間は数字を出さない。失敗の回数も「赤まであと何回」も、見る側が
+  // 知りたい情報ではないし、1/3 のような書き方は日付にも読めてしまう。
+  // 怪しいことは黄色がすでに伝えている
+  if (v.lastMs === null) return 'CHECKING';
   return v.lastMs >= 1000 ? `${(v.lastMs / 1000).toFixed(1)}s` : `${v.lastMs}ms`;
 };
 
