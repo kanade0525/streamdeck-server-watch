@@ -4,7 +4,7 @@
 // 標準の WebSocket が無いので、自前で繋ぐには WebSocket クライアントを持ち込む
 // 必要がある。公式SDKはそこを含めて面倒を見る。ビルドステップは入れていない。
 
-import { exec } from 'node:child_process';
+import { execFile } from 'node:child_process';
 import { join } from 'node:path';
 import { readFileSync } from 'node:fs';
 import streamDeck, { SingletonAction } from '@elgato/streamdeck';
@@ -112,11 +112,17 @@ class Watcher {
     })));
   }
 
-  /** 押された時。コンソールのURLが入っていれば開く */
+  /**
+   * 押された時。コンソールのURLが入っていれば開く。
+   *
+   * http/https のときだけ開く。file: や独自の scheme を許すと、
+   * 設定欄が「任意のものを起動させる入口」になってしまう。
+   * 起動は execFile で、シェルを一切経由しない（引数として渡すので、
+   * URL に何が混ざっても文字列の組み立てが崩れない）。
+   */
   open() {
     if (!/^https?:\/\//i.test(this.consoleUrl)) return false;
-    // シェルを経由させない。URL に引用符などが混ざっても組み立てが崩れないようにする
-    exec(`open ${JSON.stringify(this.consoleUrl)}`);
+    execFile('open', [this.consoleUrl]);
     return true;
   }
 
