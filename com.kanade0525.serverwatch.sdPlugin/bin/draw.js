@@ -58,11 +58,14 @@ const sparkline = (history, color) => {
     stroke-linejoin="round" stroke-linecap="round"/>`).join('') + fails;
 };
 
-/** 落ちている時間。何回失敗したかより、どれだけ落ちているかの方が知りたい */
+/**
+ * 落ちている時間。何回失敗したかより、どれだけ落ちているかの方が知りたい。
+ * ただし秒までは出さない。秒が動いても見る側の判断は変わらないので、
+ * 1分に満たないうちは「<1m」で足りる。
+ */
 export const downDuration = (ms) => {
-  const sec = Math.floor(ms / 1000);
-  if (sec < 60) return `${sec}s`;
-  const min = Math.floor(sec / 60);
+  const min = Math.floor(ms / 60_000);
+  if (min < 1) return '<1m';
   if (min < 60) return `${min}m`;
   const hour = Math.floor(min / 60);
   if (hour < 24) return `${hour}h`;
@@ -73,7 +76,9 @@ export const downDuration = (ms) => {
 const centerText = (v) => {
   if (v.status === STATUS.idle) return '—';
   if (v.status === STATUS.down) return `DOWN ${downDuration(v.downFor ?? 0)}`;
-  if (v.lastMs === null) return `…${v.consecutiveFailures}`;
+  // 疑いの間は「赤まであと何回か」を出す。失敗の回数だけを出しても、
+  // それがどれだけ深刻なのか見る側に分からない
+  if (v.lastMs === null) return `${v.consecutiveFailures}/${v.failuresToDown ?? '?'}`;
   return v.lastMs >= 1000 ? `${(v.lastMs / 1000).toFixed(1)}s` : `${v.lastMs}ms`;
 };
 

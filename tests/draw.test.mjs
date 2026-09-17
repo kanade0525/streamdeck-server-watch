@@ -37,6 +37,14 @@ test('正常なら応答時間を出す', () => {
   assert.match(watchImage({ ...base, lastMs: 2400 }), />2\.4s</, '1秒以上は秒で出す');
 });
 
+test('疑いのときは赤まであと何回かを出す', () => {
+  const svg = watchImage({
+    ...base, status: STATUS.suspect, lastMs: null,
+    consecutiveFailures: 1, failuresToDown: 3,
+  });
+  assert.match(svg, />1\/3</);
+});
+
 test('長い表示名は詰める', () => {
   const svg = watchImage({ ...base, name: 'very-long-server-name-here' });
   assert.match(svg, /…/);
@@ -63,10 +71,10 @@ test('書き方がおかしい時の絵が壊れていない', () => {
   wellFormed(badTargetImage());
 });
 
-test('落ちている時間は単位を繰り上げて短く出す', () => {
-  assert.equal(downDuration(0), '0s');
-  assert.equal(downDuration(42_000), '42s');
-  assert.equal(downDuration(59_999), '59s');
+test('落ちている時間は分から上だけを出す', () => {
+  assert.equal(downDuration(0), '<1m', '秒までは出さない');
+  assert.equal(downDuration(42_000), '<1m');
+  assert.equal(downDuration(59_999), '<1m');
   assert.equal(downDuration(60_000), '1m');
   assert.equal(downDuration(90 * 60_000), '1h');
   assert.equal(downDuration(26 * 60 * 60_000), '1d');
