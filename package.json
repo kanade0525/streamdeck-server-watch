@@ -1,6 +1,6 @@
 {
   "name": "streamdeck-server-watch",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "監視対象が生きているかをキーの色で出す。押すとコンソールを開く",
   "type": "module",
