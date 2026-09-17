@@ -58,10 +58,21 @@ const sparkline = (history, color) => {
     stroke-linejoin="round" stroke-linecap="round"/>`).join('') + fails;
 };
 
-/** 真ん中に出す値。正常なら応答時間、異常なら連続失敗回数 */
+/** 落ちている時間。何回失敗したかより、どれだけ落ちているかの方が知りたい */
+export const downDuration = (ms) => {
+  const sec = Math.floor(ms / 1000);
+  if (sec < 60) return `${sec}s`;
+  const min = Math.floor(sec / 60);
+  if (min < 60) return `${min}m`;
+  const hour = Math.floor(min / 60);
+  if (hour < 24) return `${hour}h`;
+  return `${Math.floor(hour / 24)}d`;
+};
+
+/** 真ん中に出す値。正常なら応答時間、異常なら落ちている時間 */
 const centerText = (v) => {
   if (v.status === STATUS.idle) return '—';
-  if (v.status === STATUS.down) return `DOWN ${v.consecutiveFailures}`;
+  if (v.status === STATUS.down) return `DOWN ${downDuration(v.downFor ?? 0)}`;
   if (v.lastMs === null) return `…${v.consecutiveFailures}`;
   return v.lastMs >= 1000 ? `${(v.lastMs / 1000).toFixed(1)}s` : `${v.lastMs}ms`;
 };

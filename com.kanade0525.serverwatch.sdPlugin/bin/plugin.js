@@ -70,11 +70,18 @@ class Watcher {
 
   schedule() {
     if (this.timer) clearInterval(this.timer);
+    if (this.downTicker) clearInterval(this.downTicker);
     this.timer = null;
+    this.downTicker = null;
     // 未設定や書き方がおかしい時は通信しない。利用者が入れた宛先にしか繋がない
     if (this.target.kind === 'none' || this.target.kind === 'invalid') return;
     this.tick();
     this.timer = setInterval(() => this.tick(), this.intervalMs);
+    // 落ちている間は、次の確認を待たずに経過時間の表示だけ進める。
+    // 確認の間隔が長いと「DOWN 30s」のまま何分も止まって見えてしまう
+    this.downTicker = setInterval(() => {
+      if (this.state.status === STATUS.down) this.paint();
+    }, 1000);
   }
 
   async tick() {
@@ -106,6 +113,7 @@ class Watcher {
       name: this.name || hostOf(this.target),
       lastMs: this.state.lastMs,
       consecutiveFailures: this.state.consecutiveFailures,
+      downFor: this.state.downFor(),
       history: this.state.history,
     })));
   }
@@ -120,7 +128,9 @@ class Watcher {
 
   dispose() {
     if (this.timer) clearInterval(this.timer);
+    if (this.downTicker) clearInterval(this.downTicker);
     this.timer = null;
+    this.downTicker = null;
     this.limiter.dispose();
   }
 }

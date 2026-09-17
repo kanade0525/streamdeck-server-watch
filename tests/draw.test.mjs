@@ -2,7 +2,7 @@
 // 「壊れた SVG を出さない」「状態が絵に出る」の2点を押さえる。
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { watchImage, badTargetImage } from '../com.kanade0525.serverwatch.sdPlugin/bin/draw.js';
+import { watchImage, badTargetImage, downDuration } from '../com.kanade0525.serverwatch.sdPlugin/bin/draw.js';
 import { STATUS } from '../com.kanade0525.serverwatch.sdPlugin/bin/watch-state.js';
 
 const base = {
@@ -37,11 +37,6 @@ test('正常なら応答時間を出す', () => {
   assert.match(watchImage({ ...base, lastMs: 2400 }), />2\.4s</, '1秒以上は秒で出す');
 });
 
-test('異常なら連続失敗回数を出す', () => {
-  const svg = watchImage({ ...base, status: STATUS.down, lastMs: null, consecutiveFailures: 4 });
-  assert.match(svg, />DOWN 4</);
-});
-
 test('長い表示名は詰める', () => {
   const svg = watchImage({ ...base, name: 'very-long-server-name-here' });
   assert.match(svg, /…/);
@@ -66,4 +61,22 @@ test('全部失敗の履歴でも壊れない', () => {
 
 test('書き方がおかしい時の絵が壊れていない', () => {
   wellFormed(badTargetImage());
+});
+
+test('落ちている時間は単位を繰り上げて短く出す', () => {
+  assert.equal(downDuration(0), '0s');
+  assert.equal(downDuration(42_000), '42s');
+  assert.equal(downDuration(59_999), '59s');
+  assert.equal(downDuration(60_000), '1m');
+  assert.equal(downDuration(90 * 60_000), '1h');
+  assert.equal(downDuration(26 * 60 * 60_000), '1d');
+});
+
+test('異常のときは落ちている時間を出す', () => {
+  const svg = watchImage({ ...base, status: STATUS.down, lastMs: null, downFor: 5 * 60_000 });
+  assert.match(svg, />DOWN 5m</);
+});
+
+test('落ちている時間が渡ってこなくても壊れない', () => {
+  wellFormed(watchImage({ ...base, status: STATUS.down, lastMs: null }));
 });
