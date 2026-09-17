@@ -1,0 +1,28 @@
+{
+  "SDKVersion": 3,
+  "UUID": "com.kanade0525.serverwatch",
+  "Name": "Server Watch",
+  "Version": "0.1.0.0",
+  "Author": "kanade ishida",
+  "Description": "Watches a server and turns the key green when it is up and red when it is down. Press the key to open your console page.",
+  "Category": "Server Watch",
+  "CategoryIcon": "imgs/category",
+  "Icon": "imgs/plugin",
+  "URL": "https://github.com/kanade0525/streamdeck-server-watch",
+  "CodePath": "bin/plugin.js",
+  "Nodejs": { "Version": "20" },
+  "Software": { "MinimumVersion": "6.9" },
+  "OS": [{ "Platform": "mac", "MinimumVersion": "12" }],
+  "Actions": [
+    {
+      "UUID": "com.kanade0525.serverwatch.watch",
+      "Name": "Server Watch",
+      "Icon": "imgs/action",
+      "Tooltip": "Green when the server is up, red when it is down. Press to open your console.",
+      "Controllers": ["Keypad"],
+      "DisableAutomaticStates": true,
+      "PropertyInspectorPath": "ui/watch.html",
+      "States": [{ "Image": "imgs/key", "TitleAlignment": "middle" }]
+    }
+  ]
+}

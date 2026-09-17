@@ -1,0 +1,153 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Server Watch</title>
+<!--
+  設定画面。Stream Deck が開く小さなページで、WebSocket で本体とやり取りする。
+  外部の部品は読み込まない（配布物の中だけで完結させるため）。
+-->
+<style>
+  :root { color-scheme: dark; }
+  body {
+    margin: 0; padding: 14px 16px;
+    font: 13px/1.5 -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #2d2d2d; color: #d8d8d8;
+  }
+  .field { margin-bottom: 13px; }
+  label { display: block; margin-bottom: 4px; color: #9aa4ae; font-size: 12px; }
+  input {
+    width: 100%; box-sizing: border-box; padding: 6px 8px;
+    background: #3d3d3d; color: #e8e8e8;
+    border: 1px solid #4a4a4a; border-radius: 4px; font: inherit;
+  }
+  input:focus { outline: none; border-color: #77a8d9; }
+  .row { display: flex; gap: 10px; }
+  .row .field { flex: 1; }
+  .hint { color: #7d868f; font-size: 11px; margin-top: 4px; }
+  .hint code { color: #9fb8cc; }
+  .kind { margin-top: 6px; font-size: 11px; }
+  .ok { color: #7fc99b; }
+  .bad { color: #e08b84; }
+</style>
+
+<div class="field">
+  <label for="target">Server to watch</label>
+  <input id="target" placeholder="https://example.com">
+  <div class="hint">
+    <code>https://…</code> checks the response, <code>host:port</code> opens a TCP connection,
+    a bare host name sends a ping.
+    <strong>Many cloud hosts block ping — an https:// URL is the most reliable.</strong>
+  </div>
+  <div class="kind" id="kind"></div>
+</div>
+
+<div class="field">
+  <label for="name">Display name <span style="color:#6b737b">(optional)</span></label>
+  <input id="name" placeholder="api-prod">
+</div>
+
+<div class="field">
+  <label for="consoleUrl">Console to open when pressed <span style="color:#6b737b">(optional)</span></label>
+  <input id="consoleUrl" placeholder="https://lightsail.aws.amazon.com/ls/webapp/home">
+  <div class="hint">Pressing the key opens this page. Leave it empty and the key does nothing.</div>
+</div>
+
+<div class="row">
+  <div class="field">
+    <label for="intervalSec">Every (sec)</label>
+    <input id="intervalSec" type="number" min="10" step="5">
+  </div>
+  <div class="field">
+    <label for="timeoutSec">Timeout (sec)</label>
+    <input id="timeoutSec" type="number" min="1" step="1">
+  </div>
+  <div class="field">
+    <label for="failuresToDown">Fails to red</label>
+    <input id="failuresToDown" type="number" min="1" step="1">
+  </div>
+</div>
+
+<script>
+  const DEFAULTS = {
+    target: '', name: '', consoleUrl: '',
+    intervalSec: 30, timeoutSec: 5, failuresToDown: 3,
+  };
+  const FIELDS = Object.keys(DEFAULTS);
+
+  let ws = null;
+  let uuid = null;
+  let settings = { ...DEFAULTS };
+
+  // 本体と同じ判定をここでも出す。入れた文字列がどう扱われるかを、
+  // 保存する前に見えるようにしておく
+  const kindOf = (raw) => {
+    const s = String(raw ?? '').trim();
+    if (!s) return { kind: 'none', text: '' };
+    if (/^https?:\/\//i.test(s)) {
+      try { new URL(s); return { kind: 'http', text: 'HTTP response check' }; }
+      catch { return { kind: 'invalid', text: 'Not a valid URL' }; }
+    }
+    const m = s.match(/^\[([^\]]+)\]:(\d{1,5})$/) || s.match(/^([^:/\s]+):(\d{1,5})$/);
+    if (m) {
+      const port = Number(m[2]);
+      return (port >= 1 && port <= 65535)
+        ? { kind: 'tcp', text: `TCP connection to port ${port}` }
+        : { kind: 'invalid', text: 'Port out of range' };
+    }
+    if (/[/\s]/.test(s)) return { kind: 'invalid', text: 'Not a valid host name' };
+    return { kind: 'ping', text: 'Ping (ICMP) — blocked by many cloud hosts' };
+  };
+
+  const showKind = () => {
+    const { kind, text } = kindOf(document.getElementById('target').value);
+    const el = document.getElementById('kind');
+    el.textContent = text;
+    el.className = 'kind ' + (kind === 'invalid' ? 'bad' : kind === 'none' ? '' : 'ok');
+  };
+
+  const save = () => {
+    if (!ws || ws.readyState !== 1) return;
+    ws.send(JSON.stringify({ event: 'setSettings', context: uuid, payload: settings }));
+  };
+
+  const fill = () => {
+    for (const f of FIELDS) {
+      const el = document.getElementById(f);
+      if (el) el.value = settings[f] ?? DEFAULTS[f];
+    }
+    showKind();
+  };
+
+  for (const f of FIELDS) {
+    document.getElementById(f).addEventListener('input', (e) => {
+      const el = e.target;
+      settings[f] = el.type === 'number' ? Number(el.value) : el.value;
+      if (f === 'target') showKind();
+      save();
+    });
+  }
+
+  // Stream Deck が呼び出す入口。名前は決まっている
+  function connectElgatoStreamDeckSocket(port, propertyInspectorUUID, registerEvent, info, actionInfo) {
+    uuid = propertyInspectorUUID;
+    try {
+      const parsed = JSON.parse(actionInfo);
+      settings = { ...DEFAULTS, ...(parsed.payload?.settings ?? {}) };
+    } catch { /* 設定が読めなくても既定で開ける */ }
+
+    ws = new WebSocket('ws://127.0.0.1:' + port);
+    ws.onopen = () => {
+      ws.send(JSON.stringify({ event: registerEvent, uuid: propertyInspectorUUID }));
+      fill();
+    };
+    ws.onmessage = (e) => {
+      try {
+        const msg = JSON.parse(e.data);
+        if (msg.event === 'didReceiveSettings') {
+          settings = { ...DEFAULTS, ...(msg.payload?.settings ?? {}) };
+          fill();
+        }
+      } catch { /* 読めない報せは捨てる */ }
+    };
+  }
+  window.connectElgatoStreamDeckSocket = connectElgatoStreamDeckSocket;
+</script>
