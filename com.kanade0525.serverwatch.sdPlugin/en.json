@@ -1,0 +1,27 @@
+{
+  "Name": "Server Watch",
+  "Description": "Watches a server and turns the key green when it is up and red when it is down. Press the key to open your console page.",
+  "com.kanade0525.serverwatch.watch": {
+    "Name": "Server Watch",
+    "Tooltip": "Green when the server is up, red when it is down. Press to open your console."
+  },
+  "Localization": {
+    "target": "Server to watch",
+    "targetHint": "<code>https://…</code> checks the response, <code>host:port</code> opens a TCP connection, a bare host name sends a ping.",
+    "targetWarn": "Many cloud hosts block ping — an https:// URL is the most reliable.",
+    "name": "Display name",
+    "optional": "optional",
+    "consoleUrl": "Console to open when pressed",
+    "consoleHint": "Pressing the key opens this page. Leave it empty and the key does nothing.",
+    "interval": "Every (sec)",
+    "timeout": "Timeout (sec)",
+    "failures": "Fails to red",
+    "kindHttp": "HTTP response check",
+    "kindTcp": "TCP connection to port {0}",
+    "kindPing": "Ping (ICMP) — blocked by many cloud hosts",
+    "kindBadUrl": "Not a valid URL",
+    "kindBadPort": "Port out of range",
+    "kindBadHost": "Not a valid host name",
+    "checkTarget": "check target"
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "Name": "Server Watch",
+  "Description": "サーバーが生きているかをキーの色で出します。正常なら緑、異常なら赤。押すとコンソールのページが開きます。",
+  "com.kanade0525.serverwatch.watch": {
+    "Name": "サーバー監視",
+    "Tooltip": "正常なら緑、異常なら赤。押すとコンソールが開きます。"
+  },
+  "Localization": {
+    "target": "監視するサーバー",
+    "targetHint": "<code>https://…</code> は応答を見に行き、<code>host:port</code> は TCP で繋ぎ、ホスト名だけなら ping を送ります。",
+    "targetWarn": "クラウドは ping を止めていることが多いので、https:// で書くのが最も確実です。",
+    "name": "表示名",
+    "optional": "任意",
+    "consoleUrl": "押したときに開くページ",
+    "consoleHint": "キーを押すとこのページが開きます。空なら何も起きません。",
+    "interval": "確認の間隔（秒）",
+    "timeout": "待つ時間（秒）",
+    "failures": "赤にする失敗回数",
+    "kindHttp": "応答を見に行きます",
+    "kindTcp": "ポート {0} に TCP で繋ぎます",
+    "kindPing": "ping（ICMP）— 止めているクラウドが多いです",
+    "kindBadUrl": "URL として読めません",
+    "kindBadPort": "ポート番号が範囲の外です",
+    "kindBadHost": "ホスト名として読めません",
+    "checkTarget": "監視対象を確認"
+  }
+}

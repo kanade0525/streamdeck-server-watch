@@ -134,14 +134,17 @@ export const watchImage = (v) => {
 </svg>`;
 };
 
-/** 監視対象の書き方がおかしい時 */
-export const badTargetImage = () => `<svg xmlns="http://www.w3.org/2000/svg" width="72" height="72" viewBox="0 0 72 72">
+/**
+ * 監視対象の書き方がおかしい時。
+ * キーに出る文字のうち訳すのはここだけ。UP / DOWN は監視の世界でそのまま通る言葉なので訳さない。
+ */
+export const badTargetImage = (label = 'check target') => `<svg xmlns="http://www.w3.org/2000/svg" width="72" height="72" viewBox="0 0 72 72">
   <rect width="72" height="72" rx="10" fill="${BG}"/>
   <path d="M36 20 L50 46 H22 Z" fill="none" stroke="#ffa94d" stroke-width="3" stroke-linejoin="round"/>
   <rect x="35" y="29" width="2" height="9" rx="1" fill="#ffa94d"/>
   <rect x="35" y="40" width="2" height="2.6" rx="1" fill="#ffa94d"/>
   <text x="36" y="62" text-anchor="middle" font-family="Helvetica, Arial, sans-serif"
-        font-size="9" fill="${MUTED}">check target</text>
+        font-size="9" fill="${MUTED}">${esc(label)}</text>
 </svg>`;
 
 export const dataUri = (svg) => `data:image/svg+xml;base64,${Buffer.from(svg).toString('base64')}`;

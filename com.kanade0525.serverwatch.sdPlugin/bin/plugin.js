@@ -98,7 +98,7 @@ class Watcher {
 
   paint() {
     if (this.target.kind === 'invalid') {
-      this.limiter.request(dataUri(badTargetImage()));
+      this.limiter.request(dataUri(badTargetImage(streamDeck.i18n.translate('checkTarget'))));
       return;
     }
     this.limiter.request(dataUri(watchImage({

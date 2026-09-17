@@ -46,6 +46,11 @@
 
 未設定のあいだは通信そのものをしません。
 
+## 言語
+
+英語と日本語に対応しています。Stream Deck アプリの言語に合わせて切り替わります。
+キーに出る `UP` / `DOWN` は訳していません（監視の世界でそのまま通る言葉のため）。
+
 ## 要るもの
 
 - macOS 12 以降
@@ -69,8 +74,10 @@ Stream Deck を再起動し、**Server Watch** をキーに置いてください
 ## 開発
 
 ```sh
-npm test        # 検査（依存パッケージ不要）
-npm run icons   # アイコンを作り直す
+npm test          # 検査（依存パッケージ不要）
+npm run preview   # キーの絵を実寸で書き出して目で確かめる
+npm run icons     # アイコンを作り直す
+npm run media     # 提出用の画像を作り直す
 npm run link    # 開発中のものを Stream Deck に見せる
 npm run pack    # .streamDeckPlugin を作る
 ```
@@ -83,6 +90,7 @@ com.kanade0525.serverwatch.sdPlugin/
   bin/rate-limit.js   送信の関門
   bin/plugin.js       Stream Deck との接続
   ui/watch.html       設定画面
+  en.json / ja.json   訳語
 tests/
 ```
 

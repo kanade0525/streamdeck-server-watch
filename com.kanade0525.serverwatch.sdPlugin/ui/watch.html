@@ -30,38 +30,39 @@
 </style>
 
 <div class="field">
-  <label for="target">Server to watch</label>
+  <label for="target" data-i18n="target">Server to watch</label>
   <input id="target" placeholder="https://example.com">
   <div class="hint">
-    <code>https://…</code> checks the response, <code>host:port</code> opens a TCP connection,
-    a bare host name sends a ping.
-    <strong>Many cloud hosts block ping — an https:// URL is the most reliable.</strong>
+    <span data-i18n-html="targetHint"></span>
+    <strong data-i18n="targetWarn"></strong>
   </div>
   <div class="kind" id="kind"></div>
 </div>
 
 <div class="field">
-  <label for="name">Display name <span style="color:#6b737b">(optional)</span></label>
+  <label for="name"><span data-i18n="name">Display name</span>
+    <span style="color:#6b737b">(<span data-i18n="optional">optional</span>)</span></label>
   <input id="name" placeholder="api-prod">
 </div>
 
 <div class="field">
-  <label for="consoleUrl">Console to open when pressed <span style="color:#6b737b">(optional)</span></label>
+  <label for="consoleUrl"><span data-i18n="consoleUrl">Console to open when pressed</span>
+    <span style="color:#6b737b">(<span data-i18n="optional">optional</span>)</span></label>
   <input id="consoleUrl" placeholder="https://lightsail.aws.amazon.com/ls/webapp/home">
-  <div class="hint">Pressing the key opens this page. Leave it empty and the key does nothing.</div>
+  <div class="hint" data-i18n="consoleHint"></div>
 </div>
 
 <div class="row">
   <div class="field">
-    <label for="intervalSec">Every (sec)</label>
+    <label for="intervalSec" data-i18n="interval">Every (sec)</label>
     <input id="intervalSec" type="number" min="10" step="5">
   </div>
   <div class="field">
-    <label for="timeoutSec">Timeout (sec)</label>
+    <label for="timeoutSec" data-i18n="timeout">Timeout (sec)</label>
     <input id="timeoutSec" type="number" min="1" step="1">
   </div>
   <div class="field">
-    <label for="failuresToDown">Fails to red</label>
+    <label for="failuresToDown" data-i18n="failures">Fails to red</label>
     <input id="failuresToDown" type="number" min="1" step="1">
   </div>
 </div>
@@ -76,6 +77,35 @@
   let ws = null;
   let uuid = null;
   let settings = { ...DEFAULTS };
+  let words = {};
+
+  const t = (key) => words[key] ?? key;
+
+  // 言語ごとの訳語は、本体と同じ <言語>.json から読む。
+  // 見つからなければ英語に落とす（Stream Deck の既定の言語が英語）
+  const loadWords = async (language) => {
+    for (const lang of [language, 'en']) {
+      if (!lang) continue;
+      try {
+        const res = await fetch(`../${lang}.json`);
+        if (!res.ok) continue;
+        const json = await res.json();
+        if (json && json.Localization) { words = json.Localization; return; }
+      } catch { /* 読めなければ次を試す */ }
+    }
+  };
+
+  const applyWords = () => {
+    for (const el of document.querySelectorAll('[data-i18n]')) {
+      el.textContent = t(el.dataset.i18n);
+    }
+    // 説明文には <code> を混ぜたいので、こちらだけ組み立てを許す。
+    // 中身は同梱の訳語ファイルだけで、外から来た文字列は入らない
+    for (const el of document.querySelectorAll('[data-i18n-html]')) {
+      el.innerHTML = t(el.dataset.i18nHtml);
+    }
+    showKind();
+  };
 
   // 本体と同じ判定をここでも出す。入れた文字列がどう扱われるかを、
   // 保存する前に見えるようにしておく
@@ -83,18 +113,18 @@
     const s = String(raw ?? '').trim();
     if (!s) return { kind: 'none', text: '' };
     if (/^https?:\/\//i.test(s)) {
-      try { new URL(s); return { kind: 'http', text: 'HTTP response check' }; }
-      catch { return { kind: 'invalid', text: 'Not a valid URL' }; }
+      try { new URL(s); return { kind: 'http', text: t('kindHttp') }; }
+      catch { return { kind: 'invalid', text: t('kindBadUrl') }; }
     }
     const m = s.match(/^\[([^\]]+)\]:(\d{1,5})$/) || s.match(/^([^:/\s]+):(\d{1,5})$/);
     if (m) {
       const port = Number(m[2]);
       return (port >= 1 && port <= 65535)
-        ? { kind: 'tcp', text: `TCP connection to port ${port}` }
-        : { kind: 'invalid', text: 'Port out of range' };
+        ? { kind: 'tcp', text: t('kindTcp').replace('{0}', port) }
+        : { kind: 'invalid', text: t('kindBadPort') };
     }
-    if (/[/\s]/.test(s)) return { kind: 'invalid', text: 'Not a valid host name' };
-    return { kind: 'ping', text: 'Ping (ICMP) — blocked by many cloud hosts' };
+    if (/[/\s]/.test(s)) return { kind: 'invalid', text: t('kindBadHost') };
+    return { kind: 'ping', text: t('kindPing') };
   };
 
   const showKind = () => {
@@ -133,6 +163,10 @@
       const parsed = JSON.parse(actionInfo);
       settings = { ...DEFAULTS, ...(parsed.payload?.settings ?? {}) };
     } catch { /* 設定が読めなくても既定で開ける */ }
+
+    let language = 'en';
+    try { language = JSON.parse(info)?.application?.language ?? 'en'; } catch { /* 既定のまま */ }
+    loadWords(language).then(applyWords);
 
     ws = new WebSocket('ws://127.0.0.1:' + port);
     ws.onopen = () => {

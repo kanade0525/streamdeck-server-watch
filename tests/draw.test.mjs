@@ -108,3 +108,8 @@ test('異常のときは DOWN と落ちている時間を出す', () => {
 test('落ちている時間が渡ってこなくても壊れない', () => {
   wellFormed(watchImage({ ...base, status: STATUS.down, lastMs: null }));
 });
+
+test('書き方がおかしい時の文字は差し替えられる', () => {
+  assert.match(badTargetImage(), />check target</, '既定は英語');
+  assert.match(badTargetImage('監視対象を確認'), />監視対象を確認</);
+});
