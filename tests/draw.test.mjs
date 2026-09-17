@@ -32,24 +32,44 @@ test('状態ごとに色が変わる', () => {
   assert.match(suspect, /#ffa94d/, '疑いは黄');
 });
 
-test('正常なら応答時間を出す', () => {
-  assert.match(watchImage({ ...base, lastMs: 124 }), />124ms</);
+test('正常なら UP と応答時間を出す', () => {
+  const svg = watchImage({ ...base, lastMs: 124 });
+  assert.match(svg, />UP</);
+  assert.match(svg, />124ms</);
   assert.match(watchImage({ ...base, lastMs: 2400 }), />2\.4s</, '1秒以上は秒で出す');
 });
 
-test('疑いのときは数字を出さない', () => {
-  const svg = watchImage({
-    ...base, status: STATUS.suspect, lastMs: null,
-    consecutiveFailures: 1, failuresToDown: 3,
-  });
-  assert.match(svg, />CHECKING</);
-  assert.ok(!svg.includes('1/3'), '日付に読める書き方をしない');
+test('疑いのときは UP のまま色だけ変える', () => {
+  const svg = watchImage({ ...base, status: STATUS.suspect, lastMs: null, consecutiveFailures: 1 });
+  assert.match(svg, />UP</, 'まだ落ちたと決まっていない');
+  assert.match(svg, /#ffa94d/, '色は黄');
 });
 
-test('長い表示名は詰める', () => {
+test('長い表示名は詰めて、字も小さくする', () => {
   const svg = watchImage({ ...base, name: 'very-long-server-name-here' });
   assert.match(svg, /…/);
   assert.ok(!svg.includes('very-long-server-name-here'));
+  assert.match(svg, /font-size="7\.5"/, '長い名前は小さい字で出す');
+});
+
+test('表示名はどの長さでも幅に収まる', () => {
+  // Helvetica 太字はおおよそ 0.56em。左右 6px ずつの余白を残す
+  for (const name of ['a', 'api-prod', 'kanade0525.github.io', 'x'.repeat(40)]) {
+    const svg = watchImage({ ...base, name });
+    const m = svg.match(/font-size="([\d.]+)" font-weight="600"[^>]*>([^<]*)</);
+    if (!m) continue;
+    const width = m[2].length * Number(m[1]) * 0.56;
+    assert.ok(width <= 61, `${name} → 幅 ${width.toFixed(1)}px がはみ出す`);
+  }
+});
+
+test('推移の線は数字と重ならない位置に置く', () => {
+  const svg = watchImage({ ...base, history: [10, 200, 50, 180, 90] });
+  // 数字の基準線は 52。線はそれより下だけを使う
+  const ys = [...svg.matchAll(/points="([^"]+)"/g)]
+    .flatMap((m) => m[1].split(' ').map((p) => Number(p.split(',')[1])));
+  assert.ok(ys.length > 0, '線が引かれている');
+  assert.ok(Math.min(...ys) >= 56, `線の一番上が ${Math.min(...ys)}。数字に重なっている`);
 });
 
 test('表示名に記号が入っても壊れない', () => {
@@ -73,17 +93,16 @@ test('書き方がおかしい時の絵が壊れていない', () => {
 });
 
 test('落ちている時間は分から上だけを出す', () => {
-  assert.equal(downDuration(0), '<1m', '秒までは出さない');
-  assert.equal(downDuration(42_000), '<1m');
-  assert.equal(downDuration(59_999), '<1m');
-  assert.equal(downDuration(60_000), '1m');
-  assert.equal(downDuration(90 * 60_000), '1h');
-  assert.equal(downDuration(26 * 60 * 60_000), '1d');
+  assert.equal(downDuration(0), '0m');
+  assert.equal(downDuration(5 * 60_000), '5m');
+  assert.equal(downDuration(90 * 60_000), '1h 30m');
+  assert.equal(downDuration(26 * 60 * 60_000), '1d 2h');
 });
 
-test('異常のときは落ちている時間を出す', () => {
+test('異常のときは DOWN と落ちている時間を出す', () => {
   const svg = watchImage({ ...base, status: STATUS.down, lastMs: null, downFor: 5 * 60_000 });
-  assert.match(svg, />DOWN 5m</);
+  assert.match(svg, />DOWN</);
+  assert.match(svg, />5m</);
 });
 
 test('落ちている時間が渡ってこなくても壊れない', () => {
