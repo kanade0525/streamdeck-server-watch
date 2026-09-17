@@ -3,3 +3,4 @@ logs/
 *.streamDeckPlugin
 .DS_Store
 preview/
+docs/
