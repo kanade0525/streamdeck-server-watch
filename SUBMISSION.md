@@ -42,13 +42,29 @@
 
 ## Release notes
 
+この 0.1 はまだ公開されていない（審査中に却下された）版なので、
+**「修正しました」ではなく初回リリースの内容**を書く。
+既存の利用者がいないため、変更点を書いても意味が無い。
+
 ```
 First release.
 
-Green while the server is up, red once it is down, with the recent response
-times on the key. Press the key to open your console page.
+Watch a server from a Stream Deck key. The key stays green while the server
+responds and shows the latest response time. It turns red once the server
+stops, and counts how long the outage has lasted.
 
-English and Japanese.
+- A single failed check never turns the key red. Three consecutive failures
+  are needed by default, and the number is adjustable
+- The check method is chosen from how you write the target: an https:// URL
+  requests the page, host:port opens a TCP connection, and a bare host name
+  sends a ping
+- A trend line of the recent checks runs along the bottom of the key, broken
+  where a check did not come back
+- Pressing the key opens a console page of your choice, if you set one
+- English and Japanese
+
+Requires macOS 12 or later and Stream Deck 6.9 or later. No account and no
+API key. The plugin connects only to the address you enter.
 ```
 
 ## 修正版を出すときの決まり
