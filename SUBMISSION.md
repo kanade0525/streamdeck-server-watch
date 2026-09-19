@@ -20,35 +20,25 @@
 ## Description
 
 審査で「機能の説明が足りない」と指摘されたため書き直した。
-規定は 250〜1500 字、**最初の 250 字は装飾なしの平文**（検索用）、箇条書き推奨、
-動作要件と対応ソフト名を明記すること。下記は 1,499 字。
 
-```
-Server Watch turns one Stream Deck key into a status light for a server you care about. The key stays green while the server responds and turns red once it stops, showing the latest response time and a trend of the recent checks. Press the key to open your console page, such as an AWS Lightsail dashboard or a hosting control panel, so the thing you check and the place you fix it sit on the same key.
+- 上限は **4,000 字**、Markdown が使える
+- **最初の 250 字は装飾なしの平文**にする（検索用）
+- 機能・仕組み・同梱物・動作要件を書く。箇条書き推奨
 
-How it works
+本文は **[`docs/description-en.md`](docs/description-en.md)**（3,773 字）。
+そのまま貼れる。内容は次のとおり。
 
-The plugin runs the check from your own Mac on a schedule you set. How it checks is decided by how you write the target:
-
-• https://example.com — requests the page and treats a status below 400 as up
-• example.com:5432 — opens a TCP connection to that port
-• example.com — sends a ping (ICMP)
-
-Many cloud hosts block ICMP, so an https:// URL is usually the most reliable. The settings panel tells you which method your entry will use as you type.
-
-What is included
-
-• One key action with green, yellow and red states
-• A single failed check never turns the key red. Only repeated failures do, three by default
-• Response time on the key in ms or s, and the outage length once it is down (5m, 1h 30m)
-• A trend line of the recent checks, broken where a check did not come back
-• Settings: target, display name, console URL, check interval, timeout, failures before red
-• English and Japanese
-
-Requirements
-
-macOS 12 or later, Stream Deck 6.9 or later. No account and no API key. The plugin connects only to the address you enter, and makes no connections at all before you set one.
-```
+| 節 | 何を書いたか |
+| --- | --- |
+| 冒頭（平文 402 字） | 何をする道具か。緑/赤、応答時間、押すとコンソールが開くこと |
+| How it works | 端末から直接確認すること。書き方で方式が決まる表 |
+| Reading the key | 4 つの状態。**1 回の失敗では赤にしない**理由 |
+| Pressing the key | コンソールを開く用途。空なら何も起きない |
+| What is included | アクション 1 つ、設定 6 項目、対応言語 |
+| Setting it up | 4 手順 |
+| Connections and data | 入れた宛先にしか繋がない。未設定なら通信しない。ソース公開先 |
+| Requirements | macOS 12 / Stream Deck 6.9 / キー専用 |
+| Good to know | 別プロファイルでも計測が続く、複数キー、最短 10 秒 |
 
 ## Release notes
 
