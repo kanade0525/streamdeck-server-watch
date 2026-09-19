@@ -21,16 +21,20 @@ IN=demo/raw.mov
 OUT=demo/server-watch-demo.mp4
 FONT=/System/Library/Fonts/Helvetica.ttc
 
+# Marketplace のギャラリーは mp4 なら 1920×1080 と決まっている。
+# 元の録画は 848×768 なので、高さを 1080 に伸ばして左右を余白で埋める。
+# 拡大してから字幕を描くので、文字は 1080p の解像度で鮮明に出る
+
 [ -f "$IN" ] || { echo "$IN が無い"; exit 1; }
 
 # 字幕。音声なしで送るので、何を見ているかは文字で示す。
 # フィルタの中では改行もインデントも使えないので、1行ずつ組み立てる
 cap() {
-  printf "drawtext=fontfile=%s:text='%s':x=(w-text_w)/2:y=h-46:fontsize=21:fontcolor=white:box=1:boxcolor=black@0.72:boxborderw=9" "$FONT" "$1"
+  printf "drawtext=fontfile=%s:text='%s':x=(w-text_w)/2:y=h-96:fontsize=34:fontcolor=white:box=1:boxcolor=black@0.72:boxborderw=14" "$FONT" "$1"
 }
 # 早回しの倍率を右上に出す。等速の区間には出さない
 rate() {
-  printf ",drawtext=fontfile=%s:text='%s':x=w-text_w-14:y=14:fontsize=17:fontcolor=white@0.85:box=1:boxcolor=black@0.55:boxborderw=6" "$FONT" "$1"
+  printf ",drawtext=fontfile=%s:text='%s':x=w-text_w-40:y=40:fontsize=27:fontcolor=white@0.85:box=1:boxcolor=black@0.55:boxborderw=10" "$FONT" "$1"
 }
 seg() {  # seg <入力> <開始> <終了> <倍率> <字幕> <出力名> [倍率表示]
   printf "[%s]trim=start=%s:end=%s,setpts=(PTS-STARTPTS)/%s,%s%s[%s];" \
@@ -39,7 +43,7 @@ seg() {  # seg <入力> <開始> <終了> <倍率> <字幕> <出力名> [倍率�
 
 # 画面収録は動きが無い間フレームを出さない（可変フレームレート）。
 # そのまま切ると区間の末尾が欠けるので、先に一定フレームレートに直す
-GRAPH="[0:v]fps=30,split=6[b1][b2][b3][b4][b5][b6];"
+GRAPH="[0:v]fps=30,scale=-2:1080:flags=lanczos,pad=1920:1080:(ow-iw)/2:0:color=0x1b1b1b,split=6[b1][b2][b3][b4][b5][b6];"
 
 GRAPH="$GRAPH$(seg b1 5 34 4 'Watching http\://127.0.0.1\:8777 - the key shows UP and the response time' v1 '4x')"
 GRAPH="$GRAPH$(seg b2 34 48 1 'The server is stopped - the key turns amber, not red' v2)"

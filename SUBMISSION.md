@@ -11,7 +11,7 @@
 | File | `com.kanade0525.serverwatch.streamDeckPlugin` |
 | Icon | `media/icon-512.png` |
 | Thumbnail | `media/thumbnail.png` |
-| Gallery | `media/gallery-1-colors.png` 〜 `gallery-4-privacy.png` |
+| Gallery | `demo/server-watch-demo.mp4` と `media/gallery-1-colors.png` 〜 `gallery-4-privacy.png`（計5点。最低3点） |
 | Compatibility | Stream Deck 6.9 or later（manifest から自動） |
 | SDK | Version 3（manifest から自動） |
 | DRM protection | Yes |
@@ -63,8 +63,13 @@ English and Japanese.
 
 ## デモ動画
 
-**`demo/server-watch-demo.mp4`**（78秒・約0.5MB・音声なし）を
-`maker@elgato.com` に返信で送る。
+**`demo/server-watch-demo.mp4`**（78秒・1920×1080・約0.85MB・音声なし）。
+`maker@elgato.com` に返信で送り、**ギャラリーにも入れる**。
+
+ギャラリーの規格は、画像なら 1920×960 の png/jpg（10MB まで）、
+動画なら 1920×1080 の mp4（50MB まで）。最低3点。
+元の録画は 848×768 なので、高さを 1080 に伸ばして左右を余白で埋めている
+（引き伸ばして歪ませるより素直）。
 
 元の画面収録（6分42秒）から、待ち時間だけ早回しして作った。
 **状態が切り替わる瞬間は等速**のまま残してあり、早回しの倍率は画面の右上に出している。
