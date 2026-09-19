@@ -8,7 +8,7 @@
 | --- | --- |
 | Type | Stream Deck Plugin |
 | Name | `Server Watch` |
-| File | `com.kanade0525.serverwatch.streamDeckPlugin` |
+| File | `com.kanade0525.serverwatch.streamDeckPlugin`（**版番号 0.1.0.0 で包むこと**。下記） |
 | Icon | `media/icon-512.png` |
 | Thumbnail | `media/thumbnail.png` |
 | Gallery | `demo/server-watch-demo.mp4` と `media/gallery-1-colors.png` 〜 `gallery-4-privacy.png`（計5点。最低3点） |
@@ -50,6 +50,22 @@ times on the key. Press the key to open your console page.
 
 English and Japanese.
 ```
+
+## 修正版を出すときの決まり
+
+**却下された版を直して出すときは、同じ版番号のままファイルを上げる。**
+版を上げたものを出そうとすると
+「The uploaded file must keep the same version number」で弾かれる
+（上げたい場合は修正版ではなく、新しい版として作ることになる）。
+
+手元のリポジトリが先に進んでいても、提出用だけ版番号を戻して包む。
+
+```sh
+sh scripts/pack-submission.sh 0.1.0.0
+```
+
+manifest の Version だけ一時的に差し替えて包み、すぐ元に戻す。
+中身は現在のソースのままなので、直した内容は入る。
 
 ## 審査からの指摘（2026-09-19）と対応
 
