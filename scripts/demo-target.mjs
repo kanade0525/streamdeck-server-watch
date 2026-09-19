@@ -6,6 +6,12 @@
 //   node scripts/demo-target.mjs          # 8777 で待ち受ける
 //   node scripts/demo-target.mjs --flap   # 20秒ごとに勝手に落ちて戻る（一人で撮るとき用）
 //
+// 撮影中の切り替え方は3つ。やりやすいものを使う。
+//   1. この端末で Enter を押す
+//   2. 別の端末から合図を送る（録画に端末が映らないので、こちらが綺麗）
+//        kill -USR1 $(lsof -ti :8777)    # 落とす / 戻す（押すたびに切り替わる）
+//   3. --flap で自動
+//
 // 止める: Ctrl+C
 
 import { createServer } from 'node:http';
@@ -31,6 +37,9 @@ const flip = () => {
   alive = !alive;
   console.log(alive ? '● 生きている' : '× 落ちている');
 };
+
+// 別の端末から合図で切り替える。録画に操作が映り込まない
+process.on('SIGUSR1', flip);
 
 if (flap) {
   setInterval(flip, 20000);

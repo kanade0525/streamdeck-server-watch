@@ -61,66 +61,63 @@ English and Japanese.
 再提出は Maker Console → Products → Server Watch → Versions →
 却下された版を選び、修正して再提出する。
 
-## デモ動画の撮り方
+## デモ動画
 
-**狙いは「本当に動くこと」を審査担当に見せること。** 作り込む必要はない。
-60〜90 秒、音声なしで足りる。
+**`demo/server-watch-demo.mp4`**（78秒・約0.5MB・音声なし）を
+`maker@elgato.com` に返信で送る。
 
-### 準備
+元の画面収録（6分42秒）から、待ち時間だけ早回しして作った。
+**状態が切り替わる瞬間は等速**のまま残してあり、早回しの倍率は画面の右上に出している。
 
-```sh
-npm run demo        # 的サーバーを 8777 で立てる。Enter を押すたびに落ちる/戻る
-```
+| 区間 | 内容 | 速度 |
+| --- | --- | --- |
+| 0:00 | 監視対象と `UP`・応答時間 | 4倍 |
+| 0:07 | サーバー停止 → 黄になる（まだ赤ではない） | 等速 |
+| 0:21 | 待ち | 8倍 |
+| 0:27 | 赤になり、経過時間が出る | 等速 |
+| 0:47 | 障害継続 | 10倍 |
+| 0:57 | 復旧して緑に戻る | 等速 |
 
-キーの設定は次のようにしておく。
+作り直すときは `sh scripts/edit-demo.sh`。
+切り替わりの時刻は目視ではなく、キーの色を1秒ごとに測って求めた
+（39秒で黄、99秒で赤、219秒で復帰）。
 
-| 項目 | 値 |
-| --- | --- |
-| 監視対象 | `http://127.0.0.1:8777` |
-| 表示名 | `demo-api` |
-| 押したとき開くページ | `https://lightsail.aws.amazon.com/ls/webapp/home` |
-| 確認の間隔 | **10 秒**（撮影中に待たされないため） |
-| 赤にする失敗回数 | **2 回**（同上） |
+撮り直す場合は、確認の間隔を10秒・赤にする失敗回数を2回にしておくと待たされない。
+落として戻す的サーバーは `npm run demo` で立つ。
 
-**Stream Deck と画面の両方が映る画角**にする。手持ちのスマートフォンで構わない。
-
-### 撮る順番
-
-| 秒 | 映すもの |
-| --- | --- |
-| 0:00 | 設定画面。監視対象とコンソールのURLを入れているところ |
-| 0:10 | キーが緑になり、`UP` と応答時間が出る |
-| 0:20 | 的サーバーの端末で Enter を押して落とす |
-| 0:30 | キーが黄になる（まだ赤ではないことを見せる） |
-| 0:45 | キーが赤になり、`DOWN` と経過時間が出る |
-| 0:55 | **赤いキーを押す。ブラウザでコンソールのページが開く** |
-| 1:05 | 端末で Enter を押して戻す。次の確認でキーが緑に戻る |
-
-**0:30 の黄色を必ず入れる。** 1回の失敗では赤にしないという設計が伝わる唯一の場面で、
-ここが監視ツールとしての質を示す。
-
-### 送り方
-
-`maker@elgato.com` に返信する形で送る。本文は次で足りる。
+### メール本文
 
 ```
 Hello,
 
-Here is a short demo of Server Watch as requested.
+Thank you for the review. I have made both changes.
 
-The video shows: entering a target and a console URL in the property
-inspector, the key turning green with the response time, the server going
-down (yellow first, then red after repeated failures), the outage time on
-the key, pressing the key to open the console page, and the key returning
-to green once the server is back.
+1. Description
+The description has been rewritten and expanded. It now covers what the
+plugin does, how the check method is chosen from how you write the target
+(HTTPS / TCP / ICMP), how to read the key, the settings included, the setup
+steps, and what the plugin connects to.
 
-The description has also been expanded as requested, and the revision has
-been resubmitted in Maker Console.
+2. Demo video
+A short demo is attached (78 seconds, no audio). It shows a key watching a
+local server:
+
+- The key is green and shows the response time while the server is up
+- The server is stopped, and the key turns amber rather than red, because a
+  single failed check is not treated as an outage
+- After the failures repeat, the key turns red and shows how long the server
+  has been down
+- The server is brought back, and the key returns to green on the next check
+
+Waiting between checks is sped up so the video stays short. The speed is
+shown in the top right corner, and every moment where the key changes state
+is at normal speed.
+
+The revision has been resubmitted in Maker Console.
 
 Thanks,
 Kanade Ishida
 ```
-
 
 ## Tags の候補
 
