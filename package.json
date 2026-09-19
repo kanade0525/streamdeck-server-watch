@@ -12,7 +12,8 @@
     "link": "sh scripts/link.sh",
     "pack": "sh scripts/pack.sh",
     "preview": "node scripts/preview.mjs",
-    "media": "node scripts/make-media.mjs"
+    "media": "node scripts/make-media.mjs",
+    "demo": "node scripts/demo-target.mjs"
   },
   "engines": {
     "node": ">=20.5.1"

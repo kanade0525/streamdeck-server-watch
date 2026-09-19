@@ -19,36 +19,38 @@
 
 ## Description
 
+審査で「機能の説明が足りない」と指摘されたため書き直した。
+規定は 250〜1500 字、**最初の 250 字は装飾なしの平文**（検索用）、箇条書き推奨、
+動作要件と対応ソフト名を明記すること。下記は 1,499 字。
+
 ```
-Watches a server and tells you at a glance whether it is up.
+Server Watch turns one Stream Deck key into a status light for a server you care about. The key stays green while the server responds and turns red once it stops, showing the latest response time and a trend of the recent checks. Press the key to open your console page, such as an AWS Lightsail dashboard or a hosting control panel, so the thing you check and the place you fix it sit on the same key.
 
-The key is green while the server responds, and red once it stops. A single
-failed check will not turn it red — only repeated failures do, three by
-default, so a brief hiccup does not cry wolf. The key also carries the recent
-response times, so you can see the server slowing down before it falls over.
+How it works
 
-Press the key to open your console page — the AWS Lightsail dashboard, your
-hosting panel, anything you would open next. The thing you check and the thing
-you do about it sit on the same key.
+The plugin runs the check from your own Mac on a schedule you set. How it checks is decided by how you write the target:
 
-There are only two fields to fill in: the server to watch, and the page to open.
-How the server is checked is decided by how you write it:
+• https://example.com — requests the page and treats a status below 400 as up
+• example.com:5432 — opens a TCP connection to that port
+• example.com — sends a ping (ICMP)
 
-  https://example.com   requests the page and checks the response
-  example.com:5432      opens a TCP connection to the port
-  example.com           sends a ping (ICMP)
+Many cloud hosts block ICMP, so an https:// URL is usually the most reliable. The settings panel tells you which method your entry will use as you type.
 
-Many cloud hosts block ping, so an https:// URL is usually the most reliable.
+What is included
 
-Connections: the plugin contacts the address you entered, and nothing else.
-Before you set one, it makes no connections at all. Results stay on your
-machine. The source is public at
-https://github.com/kanade0525/streamdeck-server-watch
+• One key action with green, yellow and red states
+• A single failed check never turns the key red. Only repeated failures do, three by default
+• Response time on the key in ms or s, and the outage length once it is down (5m, 1h 30m)
+• A trend line of the recent checks, broken where a check did not come back
+• Settings: target, display name, console URL, check interval, timeout, failures before red
+• English and Japanese
 
-Available in English and Japanese.
+Requirements
+
+macOS 12 or later, Stream Deck 6.9 or later. No account and no API key. The plugin connects only to the address you enter, and makes no connections at all before you set one.
 ```
 
-## Release notes（初回）
+## Release notes
 
 ```
 First release.
@@ -58,6 +60,77 @@ times on the key. Press the key to open your console page.
 
 English and Japanese.
 ```
+
+## 審査からの指摘（2026-09-19）と対応
+
+| 指摘 | 対応 |
+| --- | --- |
+| 説明文に機能・仕組み・同梱物の記載を増やすこと | 上の Description に差し替え（1,499 字） |
+| 動作確認のためのデモ動画を maker@elgato.com へ送ること | 下記の手順で撮る |
+
+再提出は Maker Console → Products → Server Watch → Versions →
+却下された版を選び、修正して再提出する。
+
+## デモ動画の撮り方
+
+**狙いは「本当に動くこと」を審査担当に見せること。** 作り込む必要はない。
+60〜90 秒、音声なしで足りる。
+
+### 準備
+
+```sh
+npm run demo        # 的サーバーを 8777 で立てる。Enter を押すたびに落ちる/戻る
+```
+
+キーの設定は次のようにしておく。
+
+| 項目 | 値 |
+| --- | --- |
+| 監視対象 | `http://127.0.0.1:8777` |
+| 表示名 | `demo-api` |
+| 押したとき開くページ | `https://lightsail.aws.amazon.com/ls/webapp/home` |
+| 確認の間隔 | **10 秒**（撮影中に待たされないため） |
+| 赤にする失敗回数 | **2 回**（同上） |
+
+**Stream Deck と画面の両方が映る画角**にする。手持ちのスマートフォンで構わない。
+
+### 撮る順番
+
+| 秒 | 映すもの |
+| --- | --- |
+| 0:00 | 設定画面。監視対象とコンソールのURLを入れているところ |
+| 0:10 | キーが緑になり、`UP` と応答時間が出る |
+| 0:20 | 的サーバーの端末で Enter を押して落とす |
+| 0:30 | キーが黄になる（まだ赤ではないことを見せる） |
+| 0:45 | キーが赤になり、`DOWN` と経過時間が出る |
+| 0:55 | **赤いキーを押す。ブラウザでコンソールのページが開く** |
+| 1:05 | 端末で Enter を押して戻す。次の確認でキーが緑に戻る |
+
+**0:30 の黄色を必ず入れる。** 1回の失敗では赤にしないという設計が伝わる唯一の場面で、
+ここが監視ツールとしての質を示す。
+
+### 送り方
+
+`maker@elgato.com` に返信する形で送る。本文は次で足りる。
+
+```
+Hello,
+
+Here is a short demo of Server Watch as requested.
+
+The video shows: entering a target and a console URL in the property
+inspector, the key turning green with the response time, the server going
+down (yellow first, then red after repeated failures), the outage time on
+the key, pressing the key to open the console page, and the key returning
+to green once the server is back.
+
+The description has also been expanded as requested, and the revision has
+been resubmitted in Maker Console.
+
+Thanks,
+Kanade Ishida
+```
+
 
 ## Tags の候補
 
