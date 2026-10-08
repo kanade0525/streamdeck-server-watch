@@ -122,7 +122,7 @@ const files = [
   // キーに最初から出る絵。下地あり・段の色
   ['key', 72, { plate: true, ink: null }],
   ['key@2x', 144, { plate: true, ink: null }],
-  // プラグインの顔。Marketplace の規定は 256×256 と、高DPI用の 512×512
+  // プラグインの顔（manifest の Icon）。Stream Deck アプリの一覧に出る
   ['plugin', 256, { plate: true, ink: null }],
   ['plugin@2x', 512, { plate: true, ink: null }],
   // 一覧に並ぶ小さい絵。背景は透明・白単色（明るい地でも暗い地でも読める）
@@ -136,3 +136,9 @@ for (const [name, size, opts] of files) {
   writeFileSync(`${out}/${name}.png`, png(size, make(size, opts), h));
 }
 console.log(`アイコンを${files.length}枚つくった`);
+
+// Marketplace のアプリアイコンは 288×288 と決まっている（docs.elgato.com/guidelines/products）。
+// 512 から縮めるとこの図形は縁が甘くなるので、その寸法のまま描き直す。
+mkdirSync('media', { recursive: true });
+writeFileSync('media/icon-288.png', png(288, make(288, { plate: true, ink: null }), 288));
+console.log('Marketplace 用に media/icon-288.png をつくった');
