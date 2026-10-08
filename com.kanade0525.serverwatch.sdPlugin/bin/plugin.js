@@ -5,8 +5,6 @@
 // 必要がある。公式SDKはそこを含めて面倒を見る。ビルドステップは入れていない。
 
 import { execFile } from 'node:child_process';
-import { join } from 'node:path';
-import { readFileSync } from 'node:fs';
 import streamDeck, { SingletonAction } from '@elgato/streamdeck';
 
 import { parseTarget, check, hostOf } from './check.js';
@@ -14,8 +12,11 @@ import { WatchState, STATUS } from './watch-state.js';
 import { watchImage, badTargetImage, dataUri } from './draw.js';
 import { RateLimiter } from './rate-limit.js';
 
-const ROOT = join(import.meta.dirname, '..');
-const VERSION = JSON.parse(readFileSync(join(ROOT, 'manifest.json'), 'utf8')).Version;
+// 版番号は Stream Deck が起動時に渡す登録情報から取る。
+// manifest.json を読んではいけない。Marketplace から入れた場合、manifest は平文ではなく
+// ELGATO で始まる暗号化された形式で置かれていて、JSON.parse が例外を投げる。
+// 開発用のシンボリックリンクでは平文のままなので、手元では絶対に再現しない。
+const VERSION = streamDeck.info.plugin.version;
 const logger = streamDeck.logger;
 
 const DEFAULTS = {

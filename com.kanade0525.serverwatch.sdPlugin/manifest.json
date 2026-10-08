@@ -2,7 +2,7 @@
   "SDKVersion": 3,
   "UUID": "com.kanade0525.serverwatch",
   "Name": "Server Watch",
-  "Version": "0.1.1.0",
+  "Version": "0.1.2.0",
   "Author": "kanade ishida",
   "Description": "Watches a server and turns the key green when it is up and red when it is down. Press the key to open your console page.",
   "Category": "Server Watch",
